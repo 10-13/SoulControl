@@ -1,0 +1,7 @@
+<Tile>
+    <HandlerScript>var MoveMode=0;var Air=0;function getMoveCallback(){return MoveMode}function onTryEnter(Entity){return false}function onGetName(){return GetAPIBase().TileType}function onGetInfo(){return GetAPIBase().TileType}
+    </HandlerScript>
+    <OnAction />
+    <Color>#FFFFFF</Color>
+    <TileType>EMPTY</TileType>
+</Tile>

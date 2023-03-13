@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPTest", "ASPTest\ASPTest.csproj", "{A6677A85-373E-4984-B46D-74FF138471E1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulControl", "SoulControl\SoulControl.csproj", "{66D1EF74-F3EF-4D35-9B24-9AE0FBCAE9B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6677A85-373E-4984-B46D-74FF138471E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6677A85-373E-4984-B46D-74FF138471E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6677A85-373E-4984-B46D-74FF138471E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6677A85-373E-4984-B46D-74FF138471E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66D1EF74-F3EF-4D35-9B24-9AE0FBCAE9B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66D1EF74-F3EF-4D35-9B24-9AE0FBCAE9B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66D1EF74-F3EF-4D35-9B24-9AE0FBCAE9B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66D1EF74-F3EF-4D35-9B24-9AE0FBCAE9B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E409BC23-52AB-4BA7-827E-5C333C536887}
+	EndGlobalSection
+EndGlobal

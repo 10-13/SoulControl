@@ -1,0 +1,89 @@
+<Player>
+    <HandlerScript> 
+        var bufs = new Set();
+
+function addBuf(buf) {
+    bufs.add(buf);
+}
+function removeBuf(buf) {
+    bufs.delete(buf);
+}
+
+function onTick() {
+    var base = GetAPIBase();
+    base.Position = CreatePoint(base.Position.X,base.Position.Y);
+    for(let b of bufs) {
+        if(b != undefined)
+            b.onTick(base);
+    }
+}
+
+function tryMove(X,Y) {
+    let tile = GetModel().InvokeAction("GetTile",[X,Y]);
+
+    if(!tile.InvokeAction("onTryEnter",GetAPIBase()))
+        return;
+    
+    var base = GetAPIBase();
+    base.Position = CreatePoint(X,Y);
+    
+    tile.InvokeAction("onEnter",GetAPIBase());
+}
+
+
+//API -----------------------------------------------
+
+function move(direction){
+    var base = GetAPIBase();
+    switch(direction) {
+        case "up":
+            tryMove(base.Position.X,base.Position.Y - 1);
+            break;
+        case "down":
+            tryMove(base.Position.X,base.Position.Y + 1);
+            break;
+        case "left":
+            tryMove(base.Position.X - 1,base.Position.Y);
+            break;
+        case "right":
+            tryMove(base.Position.X + 1,base.Position.Y);
+            break;
+    }
+}
+
+function getBufs() {
+    let val = "Bufs [" + bufs.size + "]:\n";
+    for(let buf of bufs)
+    {
+        val += buf.onGetName() + "\n\t";
+        val += buf.onGetInfo() + "\n";
+    }
+    return {
+        type: "string",
+        value: val
+    }
+}
+
+function getInfo() {
+    let val = "Stats:\n";
+    val += "\nAir:   " + GetAPIBase().Air.toString() + "\n";
+    val += "\nMoves: " + GetAPIBase().Moves.toString() + "\n";
+    return {
+        type: "string",
+        value: val
+    }
+}
+    </HandlerScript>
+    <OnAction />
+    <Position>
+        <X>1</X>
+        <Y>1</Y>
+    </Position>
+    <Collide>false</Collide>
+    <HP>100</HP>
+    <TotalHP>100</TotalHP>
+    <AirReqired>1</AirReqired>
+    <Air>3</Air>
+    <MoveMode>273</MoveMode>
+    <Moves>15</Moves>
+</Player>
