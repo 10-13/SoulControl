@@ -1,5 +1,47 @@
 <Tile>
-    <HandlerScript>var MoveMode=4352;var Air=1;function getMoveCallback(){return MoveMode}function onTryEnter(Entity){if(Entity.MoveMode&amp;&amp;MoveMode==0)return false;return true}function onEnter(Entity){if(Entity.GetType().Name=="Player"&amp;&amp;Entity.MoveMode&amp;&amp;4096==0){Entity.InvokeAction("addBuf",{baseMoves:Entity.Moves,onGetName(){return"Slowed"},onGetInfo(){return"Slowed in forest to 0.8"},pos:[Entity.Position.X,Entity.Position.Y],onTick(_Entity){Log(_Entity.Position.X.toString()+":"+_Entity.Position.Y.toString());Log(this.pos[0]+":"+this.pos[1]);if(_Entity.Position.X!=this.pos[0]||_Entity.Position.Y!=this.pos[1]){_Entity.Moves=baseMoves;_Entity.InvokeAction("removeBuf",this)}}});Entity.Moves=.8*Entity.Moves;Log("MovesChanged")}}function onStay(Entity){}function onLeave(Entity){}function onGetName(){return GetAPIBase().TileType}function onGetInfo(){return GetAPIBase().TileType}
+    <HandlerScript>var MoveMode = 0x1100;
+        var Air = 1;
+        
+        function getMoveCallback() {
+            return MoveMode;
+        }
+        
+        function onTryEnter(Entity) {
+            return (Entity.MoveMode.Value &amp; MoveMode) != 0;
+        }
+        
+        function onEnter(Entity) {
+            if(Entity.GetType().Name == "Player" &amp;&amp; (Entity.MoveMode &amp; 0x1000) == 0) {
+                let s = CreateStringObject().AddProperty("pos", [Entity.Position.X,Entity.Position.Y]);
+                s.AddFunction("onApply", function(_Entity) {
+                   _Entity.GetValue('Moves').Value *= 0.8;
+                });
+                s.AddFunction("onTick", function(_Entity) {
+                    if(_Entity.GetValue('Position').X != this.pos[0] || _Entity.GetValue('Position').Y != this.pos[1])
+                        return true;
+                    return false;
+                });
+                s.AddFunction("onGetName", function(){ return "Slowed"; }).AddFunction("onGetInfo",function(){ return "Slowed in forest to 0.8"; })
+                Log(s.toString());
+                Entity.InvokeAction("addUnEvalBuf" ,s.toString());
+            }
+        }
+        
+        function onStay(Entity) {
+        
+        }
+        
+        function onLeave(Entity) {
+            
+        }
+        
+        function onGetName() {
+            return GetAPIBase().TileType;
+        }
+        
+        function onGetInfo() {
+            return GetAPIBase().TileType;
+        }
     </HandlerScript>
     <OnAction />
     <Color>#3A3</Color>

@@ -1,4 +1,8 @@
-﻿using Jint;
+﻿using Esprima.Ast;
+using Jint;
+using Jint.Native;
+using Jint.Runtime.Interop;
+using SoulControl.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +26,18 @@ namespace SoulControl.Unit
 
         protected override void LoadValues()
         {
+            _eng.SetValue("BufebleUnit()", (JsValue val) => { return new BufebleUnit<JsValue>(val); });
+            _eng.SetValue("CreateStringObject", () => { return new JSONObject(); });
+            _eng.SetValue("StringifyFunction", (Func<JsValue, JsValue[], JsValue> function) =>
+            {
+                var obj = (dynamic)function;
+
+                if (obj.Target.GetType() != typeof(ClrFunctionInstance))
+                    return obj.Target.FunctionDeclaration.ToString();
+
+                return "function() { [native code] }";
+            });
+            _eng.SetValue("AnalyzeType", Analysis.TypeAnalyser.GetTypeAnalysis);
             _eng.SetValue("Log", (string str) => Console.WriteLine(str));
             _eng.SetValue("GetModel", 
                 (Func<Model>)(()=> { return GetParentModel(); }));

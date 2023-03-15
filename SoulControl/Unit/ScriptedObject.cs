@@ -1,4 +1,5 @@
-﻿using Jint;
+﻿using Esprima.Ast;
+using Jint;
 using Jint.Native;
 using MoonSharp.Interpreter.Debugging;
 using System;
@@ -17,6 +18,39 @@ namespace SoulControl.Unit
         private string script = "";
         protected Engine _eng = null;
         public string HandlerScript { get => script; set { script = value; compiled = false; } }
+
+        public JsValue GetValue(string name) 
+        {
+            var type = this.GetType().GetProperty(name);
+            if(type != null)
+                return JsValue.FromObject(_eng, type.GetValue(this));
+            
+            if (_eng == null)
+                return JsValue.Undefined;
+            try
+            {
+                return _eng.GetValue(name);
+            }
+            catch (Exception ex) {}
+            return JsValue.Undefined;
+        }
+        public void SetValue(string name, JsValue val)
+        {
+            var type = this.GetType().GetProperty(name);
+            if (type != null)
+            {
+                type.SetValue(this, val);
+                return;
+            }
+
+            if (_eng == null)
+                return;
+            try
+            {
+                _eng.SetValue(name, val);
+            }
+            catch (Exception ex) { }
+        }
 
         public ScriptedObject() 
         {
@@ -56,7 +90,8 @@ namespace SoulControl.Unit
             _eng.SetValue("InvokeAction", (Func<string, object[],object>)this.InvokeAction );
             _eng.SetValue("GetAPIBase", 
                 () => { 
-                    return this; });
+                    return this; 
+                });
         }
     }
 }

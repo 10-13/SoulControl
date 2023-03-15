@@ -2,77 +2,134 @@
     <HandlerScript> 
         var bufs = new Set();
 
-function addBuf(buf) {
-    bufs.add(buf);
-}
-function removeBuf(buf) {
-    bufs.delete(buf);
-}
-
-function onTick() {
-    var base = GetAPIBase();
-    base.Position = CreatePoint(base.Position.X,base.Position.Y);
-    for(let b of bufs) {
-        if(b != undefined)
-            b.onTick(base);
-    }
-}
-
-function tryMove(X,Y) {
-    let tile = GetModel().InvokeAction("GetTile",[X,Y]);
-
-    if(!tile.InvokeAction("onTryEnter",GetAPIBase()))
-        return;
-    
-    var base = GetAPIBase();
-    base.Position = CreatePoint(X,Y);
-    
-    tile.InvokeAction("onEnter",GetAPIBase());
-}
-
-
-//API -----------------------------------------------
-
-function move(direction){
-    var base = GetAPIBase();
-    switch(direction) {
-        case "up":
-            tryMove(base.Position.X,base.Position.Y - 1);
-            break;
-        case "down":
-            tryMove(base.Position.X,base.Position.Y + 1);
-            break;
-        case "left":
-            tryMove(base.Position.X - 1,base.Position.Y);
-            break;
-        case "right":
-            tryMove(base.Position.X + 1,base.Position.Y);
-            break;
-    }
-}
-
-function getBufs() {
-    let val = "Bufs [" + bufs.size + "]:\n";
-    for(let buf of bufs)
-    {
-        val += buf.onGetName() + "\n\t";
-        val += buf.onGetInfo() + "\n";
-    }
-    return {
-        type: "string",
-        value: val
-    }
-}
-
-function getInfo() {
-    let val = "Stats:\n";
-    val += "\nAir:   " + GetAPIBase().Air.toString() + "\n";
-    val += "\nMoves: " + GetAPIBase().Moves.toString() + "\n";
-    return {
-        type: "string",
-        value: val
-    }
-}
+        function addUnEvalBuf(buf) {
+            eval(buf);
+            bufs.add(temp);
+        }
+        function addBuf(buf) {
+            bufs.add(buf);
+        }
+        function removeBuf(buf) {
+            bufs.delete(buf);
+        }
+        
+        function onReset() {
+            var t = GetAPIBase().GetType().GetProperties();
+            for (let _t of t)
+            {
+                var f = _t.PropertyType.GetMethod("Restore");
+                if(f != null)
+                    f.Invoke(_t.GetValue(GetAPIBase()), []);
+            }
+        }
+        function onApply() {
+            var Entity = GetAPIBase();
+            for(let b of bufs) {
+                if(b != undefined)
+                    b.onApply(Entity);
+            }
+        }
+        function onTick() {
+            var Entity = GetAPIBase();
+            for(let b of bufs) {
+                if(b != undefined)
+                    if(b.onTick(Entity))
+                        removeBuf(b);
+            }
+        }
+        
+        function tryMove(X,Y) {
+            let tile = GetModel().InvokeAction("GetTile",[X,Y]);
+        
+            if(!tile.InvokeAction("onTryEnter",GetAPIBase()))
+                return;
+            
+            var base = GetAPIBase();
+            base.Position = CreatePoint(X,Y);
+            
+            tile.InvokeAction("onEnter",GetAPIBase());
+        }
+        
+        function createTileFromColor(color, content = "")
+        {
+            return `&lt;div class="game-tile" style="background-color: ` + color +`"&gt;` + content +`&lt;/div&gt;`;
+        }
+        function createUndefTile(color,content = "")
+        {
+            return `&lt;div class="game-tile-undefined" style="background-color: ` + color +`"&gt;` + content + `&lt;/div&gt;`;
+        }
+        
+        //API -----------------------------------------------
+        
+        function move(direction){
+            var base = GetAPIBase();
+            switch(direction) {
+                case "up":
+                    tryMove(base.Position.X,base.Position.Y - 1);
+                    break;
+                case "down":
+                    tryMove(base.Position.X,base.Position.Y + 1);
+                    break;
+                case "left":
+                    tryMove(base.Position.X - 1,base.Position.Y);
+                    break;
+                case "right":
+                    tryMove(base.Position.X + 1,base.Position.Y);
+                    break;
+            }
+        }
+        
+        function getBufs() {
+            let val = "Bufs [" + bufs.size + "]:\n";
+            for(let buf of bufs)
+            {
+                val += buf.onGetName() + "\n\t";
+                val += buf.onGetInfo() + "\n";
+            }
+            return {
+                type: "string",
+                value: val
+            }
+        }
+        
+        function getInfo() {
+            let val = "Stats:\n";
+            val += "\nAir:   " + GetAPIBase().Air.Value.toString() + "\n";
+            val += "\nMoves: " + GetAPIBase().Moves.Value.toString() + "\n";
+            return {
+                type: "string",
+                value: val
+            }
+        }
+        
+        function scan(X,Y) {
+            if(X == undefined)
+                X = GetAPIBase().Position.X;
+            if(Y == undefined)
+                Y = GetAPIBase().Position.Y;
+            let field = `&lt;div class="game-tilebox" id="game-container"&gt;\n`;
+            for(let i = -5;i &lt; 6;i++)
+                for(let j = -5; j &lt; 6;j++) {
+                    let tile = GetModel().ActualField.GetTile(X + j,Y + i);
+                    field += "\t";
+                    let content = "";
+                    if(GetAPIBase().Position.X == X + j &amp;&amp; GetAPIBase().Position.Y == Y + i)
+                        content = `&lt;div class="game-entity" style="background-color: green"&gt;&lt;/div&gt;`;
+                    if(tile.TileType == "UNDEFINED")
+                        field += createUndefTile(tile.Color,content);
+                    else
+                        field += createTileFromColor(tile.Color,content);
+                    field += "\n";
+                }
+            field += "&lt;/div&gt;";
+            return {
+                type: "html",
+                value: field
+            }
+        }
+        
+        
+        
     </HandlerScript>
     <OnAction />
     <Position>
@@ -80,10 +137,20 @@ function getInfo() {
         <Y>1</Y>
     </Position>
     <Collide>false</Collide>
-    <HP>100</HP>
-    <TotalHP>100</TotalHP>
-    <AirReqired>1</AirReqired>
-    <Air>3</Air>
-    <MoveMode>273</MoveMode>
-    <Moves>15</Moves>
+    <HP>
+        <Value>100</Value>
+        <Standart>100</Standart>
+    </HP>
+    <Air>
+        <Value>3</Value>
+        <Standart>3</Standart>
+    </Air>
+    <MoveMode>
+        <Value>272</Value>
+        <Standart>272</Standart>
+    </MoveMode>
+    <Moves>
+        <Value>15</Value>
+        <Standart>15</Standart>
+    </Moves>
 </Player>

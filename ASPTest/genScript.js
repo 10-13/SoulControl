@@ -72,4 +72,11 @@ drawFragment(40, 12, 11, 6, forest);
 
 showFragment(startX, startY, 80, 30);
 
-//for(let i = 0; i < 20;i++) { execute('move','down'); execute('move','right');}
+/*
+for(let i = 0; i < 20;i++) { execute('move','down'); execute('move','right');}
+for(let i = 0; i < 20;i++) { execute('move','down'); execute('move','right');}
+execute('getInfo'); execute('getBufs');
+
+*/
+//execute('eval','Log(AnalyzeType(GetAPIBase()));')
+//execute('eval','var e = CreateStringObject().AddProperty("pos",[11,2]).AddProperty("moveBase",15); Log(e.toString()); ')

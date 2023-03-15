@@ -1,5 +1,6 @@
 ﻿using Jint;
 using Jint.Native;
+using SoulControl.Environment;
 using SoulControl.NPC;
 using SoulControl.Unit;
 using System;
@@ -26,6 +27,7 @@ namespace SoulControl
 
         public Model() : base(null) 
         {
+            Player = new Player(this);
             eng.SetValue("api_execute", new Action<string, object[]>((string name, object[] args) => requests.Enqueue(new KeyValuePair<string, object[]>(name, args))));
             eng.Execute("var execute = (name,...params) => { api_execute(name,params); }\n");
         }
@@ -52,21 +54,37 @@ namespace SoulControl
             eng.Execute(requestString);
         }
 
-        public void Tick(ref object CallBack)
+        public IEnumerable<CallBack> Tick()
         {
-            string f = "";
-            for(int i = 0;i < Player.Moves && requests.Count > 0;i++)
+            List<CallBack> callBacks = new List<CallBack>();
+            Player.InvokeAction("onApply");
+            for (int i = 0;i < Player.Moves.Value && requests.Count > 0;i++)
             {
                 var call = requests.Dequeue();
-                var ret = Player.InvokeAction(call.Key, call.Value);
-                if(ret != null && ret.IsObject() && ret.AsObject()["type"].ToString() == "string")
-                    f += ret.AsObject()["value"].ToString() + "\n============================\n";
-                Player.InvokeAction("onTick");
-                ActualField[Player.Position.X, Player.Position.Y].InvokeAction("onStay", Player);
+                Player.InvokeAction("onReset").CreateCallBack(callBacks);
+                Player.InvokeAction("onApply").CreateCallBack(callBacks);
+                Player.InvokeAction(call.Key, call.Value).CreateCallBack(callBacks);
+                Player.InvokeAction("onTick").CreateCallBack(callBacks);
+                ActualField[Player.Position.X, Player.Position.Y].InvokeAction("onStay", Player).CreateCallBack(callBacks);
             }
+            Player.InvokeAction("onReset");
             if (ClearQueueOnTick)
                 requests.Clear();
-            CallBack = f;
+
+            return callBacks;
+        }
+        public IEnumerable<CallBack> EntityTick()
+        {
+            List<CallBack> callBacks = new List<CallBack>();
+            foreach (Entity ent in entities)
+            {
+                ent.InvokeAction("onReset").CreateCallBack(callBacks);
+                ent.InvokeAction("onApply").CreateCallBack(callBacks);
+                ent.InvokeAction("onTick").CreateCallBack(callBacks);
+                ActualField[ent.Position.X, ent.Position.Y].InvokeAction("onStay", ent).CreateCallBack(callBacks);
+            }
+
+            return callBacks;
         }
     }
 }

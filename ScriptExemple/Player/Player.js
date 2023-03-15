@@ -1,5 +1,9 @@
 var bufs = new Set();
 
+function addUnEvalBuf(buf) {
+    eval(buf);
+    bufs.add(temp);
+}
 function addBuf(buf) {
     bufs.add(buf);
 }
@@ -7,12 +11,28 @@ function removeBuf(buf) {
     bufs.delete(buf);
 }
 
-function onTick() {
-    var base = GetAPIBase();
-    base.Position = CreatePoint(base.Position.X,base.Position.Y);
+function onReset() {
+    var t = GetAPIBase().GetType().GetProperties();
+    for (let _t of t)
+    {
+        var f = _t.PropertyType.GetMethod("Restore");
+        if(f != null)
+            f.Invoke(_t.GetValue(GetAPIBase()), []);
+    }
+}
+function onApply() {
+    var Entity = GetAPIBase();
     for(let b of bufs) {
         if(b != undefined)
-            b.onTick(base);
+            b.onApply(Entity);
+    }
+}
+function onTick() {
+    var Entity = GetAPIBase();
+    for(let b of bufs) {
+        if(b != undefined)
+            if(b.onTick(Entity))
+                removeBuf(b);
     }
 }
 
@@ -23,13 +43,19 @@ function tryMove(X,Y) {
         return;
     
     var base = GetAPIBase();
-    let pt = base.Position;
     base.Position = CreatePoint(X,Y);
-    GetModel().Map.GetTile(pt.X,pt.Y).InvokeAction("onLeave",GetAPIBase());
-
+    
     tile.InvokeAction("onEnter",GetAPIBase());
 }
 
+function createTileFromColor(color)
+{
+    return `<div class="game-tile" style="background-color: ` + color +`"></div>`;
+}
+function createUndefTile(color)
+{
+    return `<div class="game-tile-undefiend" style="background-color: ` + color +`"></div>`;
+}
 
 //API -----------------------------------------------
 
@@ -53,7 +79,7 @@ function move(direction){
 
 function getBufs() {
     let val = "Bufs [" + bufs.size + "]:\n";
-    for(let buf in Array.from(bufs))
+    for(let buf of bufs)
     {
         val += buf.onGetName() + "\n\t";
         val += buf.onGetInfo() + "\n";
@@ -63,3 +89,39 @@ function getBufs() {
         value: val
     }
 }
+
+function getInfo() {
+    let val = "Stats:\n";
+    val += "\nAir:   " + GetAPIBase().Air.Value.toString() + "\n";
+    val += "\nMoves: " + GetAPIBase().Moves.Value.toString() + "\n";
+    return {
+        type: "string",
+        value: val
+    }
+}
+
+function scan(X,Y) {
+    let field = `<div class="game-tilebox" id="game-container">\n`;
+    for(let i = -5;i < 6;i++)
+        for(let j = -5; j < 6;j++) {
+            let tile = GetTile(X + j,Y + i);
+            field += "\t";
+            if(tile.TileType == "UNDEFINED")
+                field += createUndefTile(tile.Color);
+            else
+                field += createTileFromColor(tile.Color);
+            field += "\n";
+        }
+    return {
+        type: "html",
+        value: field
+    }
+}
+
+function scan() {
+    let X = GetAPIBase().Position.X;
+    let Y = GetAPIBase().Position.Y;
+    return scan(X,Y);
+}
+
+

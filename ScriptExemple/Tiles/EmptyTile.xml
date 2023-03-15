@@ -2,6 +2,6 @@
     <HandlerScript>var MoveMode=0;var Air=0;function getMoveCallback(){return MoveMode}function onTryEnter(Entity){return false}function onGetName(){return GetAPIBase().TileType}function onGetInfo(){return GetAPIBase().TileType}
     </HandlerScript>
     <OnAction />
-    <Color>#FFFFFF</Color>
+    <Color>#FFF3</Color>
     <TileType>EMPTY</TileType>
 </Tile>

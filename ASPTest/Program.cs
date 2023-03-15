@@ -10,8 +10,6 @@ using System.Xml.Linq;
 using System.Xml;
 using Jint;
 
-Console.WriteLine(0x0111);
-
 void SerializeToConsole<T>(object obj)
 {
     XmlSerializer s = new XmlSerializer(typeof(T));
@@ -60,13 +58,13 @@ while (true)
     Console.Out.Flush();
     string request = Console.ReadLine();
     if (request == "stop")
-        return;
+        break;
     Console.Clear();
     try
     {
         generator.Model.Request(request);
         object callBack = null;
-        generator.Model.Tick(ref callBack);
+        generator.Model.Tick();
         if (callBack != null && callBack is string)
             Console.WriteLine(callBack);
     }

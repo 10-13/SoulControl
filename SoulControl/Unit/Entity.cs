@@ -11,15 +11,13 @@ namespace SoulControl.Unit
     {
         public Point Position { get; set; }
         public bool Collide { get; set; }
-        public long HP { get; set; }
-        public long TotalHP { get; set; }
+        public BufebleUnit<long> HP { get; set; } = new BufebleUnit<long>(100);
         public string Color { get; set; }
-        public float AirReqired { get; set; }
-        public float Air { get; set; }
+        public BufebleUnit<float> Air { get; set; } = new BufebleUnit<float>(3);
         /// <summary>
         /// <code>"-1"="swimUnderWater"; "0"="swim"; "1"="walk"; "2"="fly"</code>
         /// </summary>
-        public int MoveMode { get; set; }
+        public BufebleUnit<int> MoveMode { get; set; } = new BufebleUnit<int>(0x0110);
 
         public Entity() : base() { }
         public Entity(Model model) : base(model) { }

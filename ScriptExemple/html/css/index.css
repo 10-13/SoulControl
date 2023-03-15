@@ -1,0 +1,55 @@
+body {
+    background-color: black;
+}
+.game-string {
+    width: 931px;
+    margin: 15px;
+    font-size: 19px;
+    color: rgb(189, 182, 151);
+    background-color: rgba(255, 255, 255, 0.103);
+    border: 3px solid rgba(255, 255, 255, 0.555);
+    border-radius: 5px;
+    padding: 4px;
+}
+.game-function:hover {
+    width: 931px;
+    transition: all 0.5s 0s;
+    background-color: rgba(255, 255, 255, 0.555);
+    border: 3px solid rgba(255, 255, 255, 0);   
+    color: #fff;
+}
+.game-tilebox {
+    width: 931px;
+    border-radius: 5px;
+    margin: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 4px;
+    background-color: #fff3;
+}
+.game-tile-undefined {
+    width: 80px;
+    height: 80px;
+    margin: 2px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    padding: 5px;
+}
+.game-tile {
+    width: 80px;
+    height: 80px;
+    margin: 2px;
+    box-sizing: border-box;
+    border: 3px solid;
+    border-radius: 5px;
+    border-color: #00ffff;
+    padding: 5px;
+}
+.game-entity {
+    width: 90%;
+    height: 90%;    
+    margin: auto;
+    border-radius: 100px;
+    border: 3px solid;
+    border-color: black;
+}

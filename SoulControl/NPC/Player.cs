@@ -9,7 +9,7 @@ namespace SoulControl.NPC
 {
     public class Player : Entity
     {
-        public int Moves { get; set; }
+        public BufebleUnit<int> Moves { get; set; } = new BufebleUnit<int>(15);
 
         public Player(Model model) : base(model) { }
         public Player() : base() { }

@@ -6,29 +6,23 @@ function getMoveCallback() {
 }
 
 function onTryEnter(Entity) {
-    if(Entity.MoveMode && MoveMode == 0)
-        return false;
-    return true;
+    return (Entity.MoveMode.Value & MoveMode) != 0;
 }
 
 function onEnter(Entity) {
-    if(Entity.GetType().Name == "Player" && Entity.MoveMode && 0x1000 == 0) {
-        Entity.InvokeAction("addBuf" ,{ 
-            baseMoves: Entity.Moves,
-            onGetName(){ return "Slowed"; },
-            onGetInfo(){ return "Slowed in forest to 0.8"; },
-            pos: [Entity.Position.X,Entity.Position.Y],
-            onTick(_Entity) {
-                Log(_Entity.Position.X.toString() + ":" +_Entity.Position.Y.toString());
-                Log(this.pos[0] + ":" + this.pos[1]);
-                if(_Entity.Position.X != this.pos[0] || _Entity.Position.Y != this.pos[1]) {
-                    _Entity.Moves = baseMoves;
-                    _Entity.InvokeAction("removeBuf",this);
-                }
-            }
+    if(Entity.GetType().Name == "Player" && (Entity.MoveMode & 0x1000) == 0) {
+        let s = CreateStringObject().AddProperty("pos", [Entity.Position.X,Entity.Position.Y]);
+        s.AddFunction("onApply", function(_Entity) {
+            _Entity.GetValue('Moves').Value *= 0.8;
         });
-        Entity.Moves = 0.8 * Entity.Moves;
-        Log("MovesChanged");
+        s.AddFunction("onTick", function(_Entity) {
+            if(_Entity.GetValue('Position').X != this.pos[0] || _Entity.GetValue('Position').Y != this.pos[1])
+                return true;
+            return false;
+        });
+        s.AddFunction("onGetName", function(){ return "Slowed"; }).AddFunction("onGetInfo",function(){ return "Slowed in forest to 0.8"; })
+        Log(s.toString());
+        Entity.InvokeAction("addUnEvalBuf" ,s.toString());
     }
 }
 

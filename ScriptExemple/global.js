@@ -10,3 +10,9 @@ buf = {
     onGetInfo: function() { return undefined; },
     onTick: function(Owner) {return undefined; }
 }
+
+callBack = {
+    type: "string" | "function" | "html" | "eval",
+    value: "strVal" | "func discription",
+    function: "FunctionSource"
+}
