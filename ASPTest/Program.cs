@@ -9,13 +9,17 @@ using System.Xml.Serialization;
 using System.Xml.Linq;
 using System.Xml;
 using Jint;
+using ASPTest.ModelAPI;
+using Microsoft.AspNetCore.Mvc;
+
+var builder = WebApplication.CreateBuilder(args);
 
 void SerializeToConsole<T>(object obj)
 {
     XmlSerializer s = new XmlSerializer(typeof(T));
     if (File.Exists("model.xml"))
         File.Delete("model.xml");
-    s.Serialize(new FileStream("model.xml",FileMode.OpenOrCreate), obj);
+    s.Serialize(new FileStream("model.xml", FileMode.OpenOrCreate), obj);
 }
 
 Options options = new Options();
@@ -26,7 +30,7 @@ options.Interop.AllowWrite = true;
 options.Interop.AllowOperatorOverloading = true;
 var eng = new Engine(options);
 
-eng.SetValue("CreateTile", (Func<Tile>)(()=>new Tile()));
+eng.SetValue("CreateTile", (Func<Tile>)(() => new Tile()));
 eng.SetValue("CreateEntity", (Func<Entity>)(() => new Entity()));
 eng.SetValue("CreateNPC", (Func<NPC>)(() => new NPC()));
 eng.SetValue("CreatePlayer", (Func<Player>)(() => new Player()));
@@ -44,43 +48,48 @@ pl.Position = new System.Drawing.Point(1, 1);*/
 
 generator.SetClearQueue(true, true);
 
-eng.SetValue("log", (Action<string>)((string str) => { 
-    Console.Write(str); }));
+eng.SetValue("log", (Action<string>)((string str) => {
+    Console.Write(str);
+}));
 eng.SetValue("gen", generator);
 
 eng.Execute(File.ReadAllText("genScript.js"));
 
 
-while (true)
-{
-    
-    eng.Invoke("showFragment", 0, 0, 80, 30);
-    Console.Out.Flush();
-    string request = Console.ReadLine();
-    if (request == "stop")
-        break;
-    Console.Clear();
-    try
-    {
-        generator.Model.Request(request);
-        object callBack = null;
-        generator.Model.Tick();
-        if (callBack != null && callBack is string)
-            Console.WriteLine(callBack);
-    }
-    catch(Exception ex)
-    {
-        Console.WriteLine(ex.ToString());
-    }
-}
+ModelAPI.Model = generator.Model;
 
-SerializeToConsole<Model>(generator.Model);
+// добавляем в приложение сервисы Razor Pages
+builder.Services.AddRazorPages(options =>
+{
+    // отключаем глобально Antiforgery-токен
+    options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
+});
+
+var app = builder.Build();
+
+// добавляем поддержку маршрутизации для Razor Pages
+app.MapRazorPages();
+
+app.Run();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
-
 app.Run(async (context) =>
 {
     var response = context.Response;

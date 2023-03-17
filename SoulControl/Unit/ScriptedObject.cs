@@ -14,10 +14,9 @@ namespace SoulControl.Unit
 {
     public abstract class ScriptedObject
     {
-        private bool compiled = false;
-        private string script = "";
+        
         protected Engine _eng = null;
-        public string HandlerScript { get => script; set { script = value; compiled = false; } }
+        
 
         public JsValue GetValue(string name) 
         {
@@ -64,30 +63,12 @@ namespace SoulControl.Unit
             LoadValues();
         }
 
-        public JsValue InvokeAction(string Name, params object[] args)
-        {
-            if (!compiled)
-            {
-                _eng.Execute(script);
-                compiled = true;
-            }
-
-            try
-            {
-                return _eng.Invoke(Name, args);
-            }
-            catch (Exception ex) 
-            {
-                Console.WriteLine($"<ERROR>\n\t<Occured>{Name}</Occured>\n<ERROR>");
-                Console.WriteLine(ex.ToString());
-            }
-            return null;
-        }
+        
 
         protected virtual void LoadValues()
         {
             _eng.SetValue("CreatePoint", (int X, int Y) => { return new Point(X, Y); });
-            _eng.SetValue("InvokeAction", (Func<string, object[],object>)this.InvokeAction );
+           
             _eng.SetValue("GetAPIBase", 
                 () => { 
                     return this; 

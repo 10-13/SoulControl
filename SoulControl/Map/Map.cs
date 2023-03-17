@@ -15,17 +15,16 @@ namespace SoulControl.Map
     {
         private Dictionary<Point, Tile> tiles = new Dictionary<Point, Tile>();
 
-        public List<(Point,Tile)> TilesCollection
+        public List<KeyValuePair<Point,Tile>> TilesCollection
         {
             get
             {
-                return (from h in tiles.ToList() select (h.Key,h.Value)).ToList();
+                return tiles.ToList();
             }
             set
             {
-                tiles.Clear();
                 foreach (var ppt in value)
-                    tiles.Add(ppt.Item1, ppt.Item2);
+                    tiles.Add(ppt.Key, ppt.Value);
             }
         }
         public Tile this[int x,int y]
@@ -59,6 +58,11 @@ namespace SoulControl.Map
         public Point GetTilePosition(Tile tile)
         {
             return tiles.First((KeyValuePair<Point, Tile> p) => { return p.Value == tile; }).Key;
+        }
+        public void Validate()
+        {
+            foreach(Tile t in tiles.Values)
+                t.LinkModel(GetParentModel());
         }
     }
 }

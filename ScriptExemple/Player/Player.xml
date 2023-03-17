@@ -94,8 +94,16 @@
         
         function getInfo() {
             let val = "Stats:\n";
-            val += "\nAir:   " + GetAPIBase().Air.Value.toString() + "\n";
-            val += "\nMoves: " + GetAPIBase().Moves.Value.toString() + "\n";
+            val += "\tAir:   " + GetAPIBase().Air.Value.toString() + "\n";
+            val += "\tMoves: " + GetAPIBase().Moves.Value.toString() + "\n";
+            val += "\tX:      " + GetAPIBase().Position.X.toString() + "\n";
+            val += "\tY:      " + GetAPIBase().Position.Y.toString() + "\n";
+            val += "Funcs:\n";
+            val += "\tvoid getBufs()\n";
+            val += "\tvoid getInfo()\n";
+            val += "\tvoid move(right | left | up | down)\n";
+            val += "\tvoid scan(integer: dX, integer: dY)\n";
+            val += "\tvoid getTileInfo(integer: aX, integer: aY)\n";
             return {
                 type: "string",
                 value: val
@@ -105,8 +113,12 @@
         function scan(X,Y) {
             if(X == undefined)
                 X = GetAPIBase().Position.X;
+            else
+                X += GetAPIBase().Position.X;
             if(Y == undefined)
                 Y = GetAPIBase().Position.Y;
+            else
+                Y += GetAPIBase().Position.Y;
             let field = `&lt;div class="game-tilebox" id="game-container"&gt;\n`;
             for(let i = -5;i &lt; 6;i++)
                 for(let j = -5; j &lt; 6;j++) {
@@ -126,6 +138,26 @@
                 type: "html",
                 value: field
             }
+        }
+
+        function getTileInfo(X,Y) {
+            if(X == undefined)
+                X = GetAPIBase().Position.X;
+            if(Y == undefined)
+                Y = GetAPIBase().Position.Y;
+            let root = GetModel().ActualField.GetTile(X,Y);
+            let val = '&lt;div style="display: flex; width: 100%; flex-wrpa: wrpa;"&gt;';
+            val += '&lt;div style="width: 100px; height: 100px; background-color: ' + root.Color + ';"&gt;&lt;/div&gt;';
+            val += '&lt;div style="width: maximize;"&gt;';
+            val += '&lt;h2&gt;' + root.InvokeAction('onGetName') + '&lt;/h2&gt;';
+            val += '&lt;h6&gt;' + '[' + X.toString() + ' : ' + Y.toString() + ']' + '&lt;/h6&gt;';
+            val += '&lt;h4&gt;' + root.InvokeAction('onGetInfo') + '&lt;/h4&gt;';
+            val += '&lt;/div&gt;';
+            val += '&lt;/div&gt;';
+            return {
+                type: "html",
+                value: val
+            };
         }
         
         

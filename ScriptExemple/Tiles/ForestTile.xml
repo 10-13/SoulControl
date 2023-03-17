@@ -40,7 +40,7 @@
         }
         
         function onGetInfo() {
-            return GetAPIBase().TileType;
+            return GetAPIBase(). + "\nSlowed on forest";
         }
     </HandlerScript>
     <OnAction />

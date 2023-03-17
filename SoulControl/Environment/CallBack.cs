@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -60,16 +61,15 @@ namespace SoulControl.Environment
         public CallBack(Jint.Native.JsValue obj)
         {
             if (!obj.IsObject())
-                return;
-
-            if (!obj.IsObject())
+            {
                 if (obj.IsString())
                 {
                     Type = "string";
-                    Value = obj.AsString();
+                    Value = WebUtility.HtmlEncode(obj.AsString());
+                    Initialized = true;
                 }
-                else
-                    return;
+                return;
+            }
 
             if (obj.AsObject().TryGetValue("type", out Jint.Native.JsValue val1))
                 FullType = val1.ToString();
@@ -77,6 +77,7 @@ namespace SoulControl.Environment
                 Value = val2.ToString();
             if (obj.AsObject().TryGetValue("source", out Jint.Native.JsValue val3))
                 Source = val3.ToString();
+            Initialized = true;
         }
 
         public override string ToString()

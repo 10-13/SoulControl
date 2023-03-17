@@ -64,8 +64,12 @@ namespace SoulControl.Utils
         }
         public void SetClearQueue(bool a,bool b)
         {
-            _model.ClearQueueOnTick = a;
-            _model.ClearQueueOnRequest = b;
+            if (_model.Options == null)
+                _model.Options = new ModelOptions.Options();
+            if (_model.Options.Request == null)
+                _model.Options.Request = new ModelOptions.Detailed.RequestOptions();
+            _model.Options.Request.ClearQueueOnTick = a;
+            _model.Options.Request.ClearQueueOnRequest = b;
         }
     }
 }

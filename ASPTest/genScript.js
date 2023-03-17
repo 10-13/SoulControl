@@ -73,7 +73,10 @@ drawFragment(40, 12, 11, 6, forest);
 showFragment(startX, startY, 80, 30);
 
 /*
-for(let i = 0; i < 20;i++) { execute('move','down'); execute('move','right');}
+for(let i = 0; i < 20;i++) { 
+	execute('move','down'); 
+	execute('move','right');
+}
 for(let i = 0; i < 20;i++) { execute('move','down'); execute('move','right');}
 execute('getInfo'); execute('getBufs');
 

@@ -1,7 +1,9 @@
-﻿using Jint;
+﻿using Esprima.Ast;
+using Jint;
 using Jint.Native;
 using SoulControl.Environment;
 using SoulControl.NPC;
+using SoulControl.ModelOptions;
 using SoulControl.Unit;
 using System;
 using System.Collections;
@@ -11,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using Microsoft.Scripting.Actions;
 
 namespace SoulControl
 {
@@ -18,18 +21,19 @@ namespace SoulControl
     {
         private Engine eng = new Engine();
         private Queue<KeyValuePair<string, object[]>> requests = new Queue<KeyValuePair<string, object[]>>();
+        private List<CallBack> modelLogs = new List<CallBack>();
 
         public Map.Map ActualField { get; set; }
         public List<Entity> entities { get; set; } = new List<Entity>();
         public Player Player { get; set; }
-        public bool ClearQueueOnTick { get; set; }
-        public bool ClearQueueOnRequest { get; set; }
+        public ModelOptions.Options Options { get; set; } = new ModelOptions.Options();
 
         public Model() : base(null) 
         {
             Player = new Player(this);
             eng.SetValue("api_execute", new Action<string, object[]>((string name, object[] args) => requests.Enqueue(new KeyValuePair<string, object[]>(name, args))));
             eng.Execute("var execute = (name,...params) => { api_execute(name,params); }\n");
+            eng.SetValue("Options", Options);
         }
 
         protected override void LoadValues()
@@ -49,7 +53,7 @@ namespace SoulControl
 
         public void Request(string requestString)
         {
-            if (ClearQueueOnRequest)
+            if (Options.Request.ClearQueueOnRequest)
                 requests.Clear();
             eng.Execute(requestString);
         }
@@ -61,6 +65,8 @@ namespace SoulControl
             for (int i = 0;i < Player.Moves.Value && requests.Count > 0;i++)
             {
                 var call = requests.Dequeue();
+                if (!Options.Interop.AllowEval && call.Key == "eval")
+                    continue;
                 Player.InvokeAction("onReset").CreateCallBack(callBacks);
                 Player.InvokeAction("onApply").CreateCallBack(callBacks);
                 Player.InvokeAction(call.Key, call.Value).CreateCallBack(callBacks);
@@ -68,10 +74,10 @@ namespace SoulControl
                 ActualField[Player.Position.X, Player.Position.Y].InvokeAction("onStay", Player).CreateCallBack(callBacks);
             }
             Player.InvokeAction("onReset");
-            if (ClearQueueOnTick)
+            if (Options.Request.ClearQueueOnTick)
                 requests.Clear();
 
-            return callBacks;
+            return from h in callBacks where (Options.CallBack.FilterPrivate ? !h.Flags.Contains(Options.CallBack.PrivateFlag) : true) select h;
         }
         public IEnumerable<CallBack> EntityTick()
         {
@@ -84,7 +90,26 @@ namespace SoulControl
                 ActualField[ent.Position.X, ent.Position.Y].InvokeAction("onStay", ent).CreateCallBack(callBacks);
             }
 
-            return callBacks;
+            return from h in callBacks where (Options.CallBack.FilterPrivate ? !h.Flags.Contains(Options.CallBack.PrivateFlag) : true) select h; ;
+        }
+        public void Log(JsValue value)
+        {
+            value.CreateCallBack(modelLogs);
+        }
+        public IEnumerable<CallBack> GetCallBacks(bool clear = true)
+        {
+            var res = (from h in modelLogs where (Options.CallBack.FilterPrivate ? !h.Flags.Contains(Options.CallBack.PrivateFlag) : true) select h).ToList();
+            if (clear)
+                modelLogs.Clear();
+            return res;
+        }
+        public void Validate()
+        {
+            Player.LinkModel(this);
+            ActualField.LinkModel(this);
+            ActualField.Validate();
+            foreach (Entity ent in entities)
+                ent.LinkModel(this);
         }
     }
 }
